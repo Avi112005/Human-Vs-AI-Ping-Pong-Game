@@ -2,11 +2,9 @@ import pygame
 import random
 import math
 
-# Initialize Pygame and mixer for sound
 pygame.init()
 pygame.mixer.init()
 
-# Load music (make sure menu_music.mp3 is in the same directory)
 MENU_MUSIC_FILE = "Game loading screen music (Music sample).mp3"
 try:
     pygame.mixer.music.load(MENU_MUSIC_FILE)
@@ -107,7 +105,7 @@ class Paddle:
         if not self.ai_difficulty:
             return
 
-        if ball.speed_x > 0:  # Only move if ball is coming towards AI
+        if ball.speed_x > 0:  
             # Add randomness based on difficulty
             prediction_error = random.randint(-self.prediction_error, self.prediction_error)
             target_y = ball.y + prediction_error
@@ -120,7 +118,7 @@ class Paddle:
                     self.move(up=True)
 
     def draw(self):
-        # Draw paddle glow
+        
         for i in range(3):
             glow_size = (3 - i) * 2
             s = pygame.Surface((self.width + glow_size * 2, self.height + glow_size * 2), pygame.SRCALPHA)
@@ -144,7 +142,7 @@ class Ball:
         self.speed_y = random.randint(-3, 3)
 
     def move(self):
-        # Add current position to trail
+        
         self.trail.append((self.x, self.y))
         if len(self.trail) > self.trail_length:
             self.trail.pop(0)
@@ -156,14 +154,14 @@ class Ball:
             self.speed_y *= -1
 
     def draw(self):
-        # Draw trail
+        
         for i, pos in enumerate(self.trail):
             alpha = int(255 * (i / self.trail_length))
             s = pygame.Surface((BALL_SIZE, BALL_SIZE), pygame.SRCALPHA)
             pygame.draw.rect(s, (255, 255, 255, alpha), s.get_rect())
             screen.blit(s, pos)
 
-        # Draw ball with rainbow effect
+        
         time_color = pygame.time.get_ticks() // 50  # Changes color over time
         rainbow_color = (
             abs(math.sin(time_color * 0.1)) * 255,  # Red
@@ -171,7 +169,7 @@ class Ball:
             abs(math.sin(time_color * 0.1 + 4)) * 255   # Blue
         )
 
-        # Draw ball glow
+
         for i in range(3):
             glow_size = (3 - i) * 2
             s = pygame.Surface((BALL_SIZE + glow_size * 2, BALL_SIZE + glow_size * 2), pygame.SRCALPHA)
@@ -179,7 +177,7 @@ class Ball:
             pygame.draw.rect(s, (*rainbow_color, alpha), s.get_rect())
             screen.blit(s, (self.x - glow_size, self.y - glow_size))
 
-        # Draw main ball
+        
         pygame.draw.rect(screen, rainbow_color, (self.x, self.y, BALL_SIZE, BALL_SIZE))
 
 class Game:
@@ -191,10 +189,12 @@ class Game:
         self.handle_music()
 
     def handle_music(self):
-        # Play music on menu or difficulty states, stop on game state
         if self.state in ("menu", "difficulty"):
             if not pygame.mixer.music.get_busy():
-                pygame.mixer.music.play(-1)  # Loop indefinitely
+                pygame.mixer.music.play(-1)  
+        elif self.state == "game":
+            if not pygame.mixer.music.get_busy():
+                pygame.mixer.music.play(-1)  
         else:
             if pygame.mixer.music.get_busy():
                 pygame.mixer.music.stop()
@@ -224,7 +224,6 @@ class Game:
         if not hasattr(self, 'ball'):
             return
 
-        # Ball collision with paddles
         if (self.ball.x <= self.player.x + PADDLE_WIDTH and
             self.ball.y + BALL_SIZE >= self.player.y and
             self.ball.y <= self.player.y + PADDLE_HEIGHT and
@@ -255,7 +254,6 @@ class Game:
             self.ai.ai_move(self.ball)
             self.handle_collision()
 
-            # Score points
             if self.ball.x <= 0:
                 self.ai.score += 1
                 self.ball.reset()
@@ -274,19 +272,16 @@ class Game:
     def draw_menu(self):
         screen.fill(BLACK)
 
-        # Draw main title
         title_font = pygame.font.Font(None, 100)
         title_text = title_font.render("Human vs AI", True, NEON_PURPLE)
         title_rect = title_text.get_rect(center=(WIDTH//2, 80))
         screen.blit(title_text, title_rect)
 
-        # Draw subtitle
         subtitle_font = pygame.font.Font(None, 74)
         subtitle_text = subtitle_font.render("PONG", True, NEON_BLUE)
         subtitle_rect = subtitle_text.get_rect(center=(WIDTH//2, 150))
         screen.blit(subtitle_text, subtitle_rect)
 
-        # Draw instructions
         instruction_font = pygame.font.Font(None, 28)
         instructions = [
             "How to Play:",
@@ -300,22 +295,21 @@ class Game:
             rect = text.get_rect(center=(WIDTH//2, HEIGHT - 150 + i * 30))
             screen.blit(text, rect)
 
-        # Draw buttons
         self.play_button.draw(screen)
 
     def draw_difficulty(self):
         screen.fill(BLACK)
 
-        # Draw difficulty selection title
+        
         diff_title_font = pygame.font.Font(None, 74)
         diff_title = diff_title_font.render("Select Difficulty", True, NEON_PURPLE)
         diff_title_rect = diff_title.get_rect(center=(WIDTH//2, 80))
         screen.blit(diff_title, diff_title_rect)
 
-        # Draw buttons only, no descriptions
-        button_y_positions = [150, 280, 410]  # Increased spacing between buttons
+        
+        button_y_positions = [150, 280, 410]  
         for button, y_pos in zip([self.easy_button, self.medium_button, self.hard_button], button_y_positions):
-            button.rect.y = y_pos  # Update button position
+            button.rect.y = y_pos  
             button.draw(screen)
 
     def draw_game(self):
@@ -329,7 +323,7 @@ class Game:
         self.ai.draw()
         self.ball.draw()
 
-        # Draw scores with glow
+        
         for i in range(3):
             offset = i * 2
             alpha = 255 - i * 50
@@ -346,7 +340,7 @@ class Game:
             screen.blit(restart_text, (WIDTH//2 - restart_text.get_width()//2, HEIGHT//2 + 50))
 
     def draw(self):
-        # Update music based on current state
+        
         self.handle_music()
 
         if self.state == "menu":
@@ -390,4 +384,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
