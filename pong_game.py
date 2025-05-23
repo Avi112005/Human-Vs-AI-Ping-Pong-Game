@@ -2,8 +2,16 @@ import pygame
 import random
 import math
 
-# Initialize Pygame
+# Initialize Pygame and mixer for sound
 pygame.init()
+pygame.mixer.init()
+
+# Load music (make sure menu_music.mp3 is in the same directory)
+MENU_MUSIC_FILE = "Game loading screen music (Music sample).mp3"
+try:
+    pygame.mixer.music.load(MENU_MUSIC_FILE)
+except pygame.error:
+    print(f"Warning: Could not load music file '{MENU_MUSIC_FILE}'. Make sure the file exists.")
 
 # Game constants
 WIDTH = 800
@@ -180,6 +188,16 @@ class Game:
         self.difficulty = difficulty
         self.setup_menu_buttons()
         self.setup_game()
+        self.handle_music()
+
+    def handle_music(self):
+        # Play music on menu or difficulty states, stop on game state
+        if self.state in ("menu", "difficulty"):
+            if not pygame.mixer.music.get_busy():
+                pygame.mixer.music.play(-1)  # Loop indefinitely
+        else:
+            if pygame.mixer.music.get_busy():
+                pygame.mixer.music.stop()
 
     def setup_menu_buttons(self):
         button_width = 200
@@ -328,6 +346,9 @@ class Game:
             screen.blit(restart_text, (WIDTH//2 - restart_text.get_width()//2, HEIGHT//2 + 50))
 
     def draw(self):
+        # Update music based on current state
+        self.handle_music()
+
         if self.state == "menu":
             self.draw_menu()
         elif self.state == "difficulty":
@@ -369,3 +390,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
